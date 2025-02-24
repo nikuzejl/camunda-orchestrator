@@ -9,3 +9,6 @@ spring.main.allow-bean-definition-overriding: true
 spring.kafka.bootstrap-servers: localhost:9092
 #spring.kafka.consumer.auto-offset-reset: earliest
 
+#camunda.connector.polling.enabled: true
+#camunda.connector.polling.interval: 5000
+#camunda.connector.webhook.enabled: true

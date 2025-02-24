@@ -3,8 +3,8 @@ package io.camunda.getstarted;
 import io.camunda.zeebe.client.ZeebeClient;
 import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
 import io.camunda.zeebe.spring.client.annotation.Deployment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,7 +17,7 @@ import java.util.Map;
 @Deployment(resources = "classpath:send-email.bpmn")
 public class ProcessApplication implements CommandLineRunner {
 
-  private final static Logger LOG = LoggerFactory.getLogger(ProcessApplication.class);
+  //private final static Logger LOG = LoggerFactory.getLogger(ProcessApplication.class);
 
   public static void main(String[] args) {
     SpringApplication.run(ProcessApplication.class, args);
@@ -37,8 +37,8 @@ public class ProcessApplication implements CommandLineRunner {
             .send()
             .join();
 
-    LOG.info("Started instance for processDefinitionKey='{}', bpmnProcessId='{}', version='{}' with processInstanceKey='{}'",
-        event.getProcessDefinitionKey(), event.getBpmnProcessId(), event.getVersion(), event.getProcessInstanceKey());
+//    LOG.info("Started instance for processDefinitionKey='{}', bpmnProcessId='{}', version='{}' with processInstanceKey='{}'",
+//        event.getProcessDefinitionKey(), event.getBpmnProcessId(), event.getVersion(), event.getProcessInstanceKey());
   }
 
   CommandLineRunner commandLineRunner(KafkaTemplate<String, String> kafkaTemplate) {

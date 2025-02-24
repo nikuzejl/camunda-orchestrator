@@ -1,0 +1,49 @@
+global:
+  identity:
+    auth:
+      # Disable Identity authentication for local development
+      # it will fall back to basic-auth: demo/demo as default user
+      enabled: false
+
+# Disable Identity for local development
+identity:
+  enabled: false
+
+# Disable Optimize
+optimize:
+  enabled: false
+
+# Reduce resource usage for Zeebe and Zeebe-Gateway
+zeebe:
+  clusterSize: 1
+  partitionCount: 1
+  replicationFactor: 1
+  pvcSize: 10Gi
+  resources: {}
+  initResources: {}
+
+zeebe-gateway:
+  replicas: 1
+
+# Enable Outbound Connectors only
+connectors:
+  enabled: true
+  inbound:
+    mode: "disabled"
+
+# Configure Elasticsearch to make it running for local development
+elasticsearch:
+  resources: {}
+  initResources: {}
+  replicas: 1
+  minimumMasterNodes: 1
+  # Allow no backup for single node setups
+  clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+
+  # Request smaller persistent volumes.
+  volumeClaimTemplate:
+    accessModes: [ "ReadWriteOnce" ]
+    storageClassName: "standard"
+    resources:
+      requests:
+        storage: 15Gi
