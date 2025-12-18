@@ -1,14 +1,13 @@
-#zeebe.client.cloud.clusterId=YOUR_CLUSTER_ID
-#zeebe.client.cloud.clientId=YOUR_CLIENT_ID
-#zeebe.client.cloud.clientSecret=YOUR_CLIENT_SECRET
-
-zeebe.client.broker.gatewayAddress: 127.0.0.1:26500
-zeebe.client.security.plaintext: true
-spring.main.allow-bean-definition-overriding: true
-
-spring.kafka.bootstrap-servers: localhost:9092
-#spring.kafka.consumer.auto-offset-reset: earliest
-
-#camunda.connector.polling.enabled: true
-#camunda.connector.polling.interval: 5000
-#camunda.connector.webhook.enabled: true
+camunda:
+  client:
+    mode: self-managed
+    grpc-address: http://localhost:26500
+    rest-address: http://localhost:8080
+    deployment:
+      enabled: true
+    worker:
+      defaults:
+        stream-enabled: false # default
+  rest:
+    swagger:
+      enabled: true # default

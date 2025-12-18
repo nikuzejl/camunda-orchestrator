@@ -1,49 +1,121 @@
 package io.camunda.getstarted;
 
-import io.camunda.zeebe.client.ZeebeClient;
-import io.camunda.zeebe.client.api.response.ProcessInstanceEvent;
-import io.camunda.zeebe.spring.client.annotation.Deployment;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
+import io.camunda.client.CamundaClient;
+import io.camunda.client.api.search.response.MessageSubscription;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.kafka.core.KafkaTemplate;
 
 import java.util.Map;
 
 @SpringBootApplication
-@Deployment(resources = "classpath:send-email.bpmn")
-public class ProcessApplication implements CommandLineRunner {
+public class ProcessApplication {
 
-  //private final static Logger LOG = LoggerFactory.getLogger(ProcessApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessApplication.class);
 
-  public static void main(String[] args) {
-    SpringApplication.run(ProcessApplication.class, args);
-  }
+    @Autowired
+    private CamundaClient camundaClient;
 
-  @Autowired
-  private ZeebeClient client;
+    public static void main(String[] args) {
+        SpringApplication.run(ProcessApplication.class, args);
+    }
 
-  @Override
-  public void run(final String... args) throws Exception {
-    final ProcessInstanceEvent event =
-        client
-            .newCreateInstanceCommand()
-            .bpmnProcessId("send-email")
-            .latestVersion()
-            .variables(Map.of("message_content", "Hello from the Spring Boot get started"))
-            .send()
-            .join();
+    @PostConstruct
+    public void start() {
+        try {
+            deployProcess("test-process.bpmn", null);
+            getMessageSubscriptions();
+            publishMessage("START-MSG", "some-key", Map.of("runId", "123"), null);
+            publishMessage("MSG-1", "123", Map.of("runId", "123"), null);
+            publishMessage("MSG-2", "123", Map.of("runId", "123"), null);
+        } catch (Exception e) {
+            LOGGER.error("Startup failure", e);
+        }
+    }
 
-//    LOG.info("Started instance for processDefinitionKey='{}', bpmnProcessId='{}', version='{}' with processInstanceKey='{}'",
-//        event.getProcessDefinitionKey(), event.getBpmnProcessId(), event.getVersion(), event.getProcessInstanceKey());
-  }
+    private void deployProcess(String processDefinition, String tenant) {
+        var command = camundaClient.newDeployResourceCommand()
+                .addResourceFromClasspath(processDefinition);
 
-  CommandLineRunner commandLineRunner(KafkaTemplate<String, String> kafkaTemplate) {
-    return args -> {
-      kafkaTemplate.send("camunda-task", "Hello from the Spring Boot get started");
-    };
-  }
+        if (tenant != null && !tenant.isBlank()) {
+            command.tenantId(tenant);
+        }
+
+        var deployment = command.send().join();
+
+        LOGGER.info("Deployment successful: {}", deployment.getKey());
+
+        deployment.getProcesses().forEach(p ->
+                LOGGER.info("Deployed process: {} v{} (Tenant: {})",
+                        p.getBpmnProcessId(),
+                        p.getVersion(),
+                        p.getTenantId()
+                )
+        );
+    }
+
+    private void publishMessage(
+            String messageName,
+            String correlationKey,
+            Map<String, Object> variables,
+            String tenant
+    ) {
+        var command = camundaClient.newPublishMessageCommand()
+                .messageName(messageName)
+                .correlationKey(correlationKey)
+                .variables(variables);
+
+        if (tenant != null && !tenant.isBlank()) {
+            command.tenantId(tenant);
+        }
+
+        command.send().join();
+
+        LOGGER.info(
+                "Message published: name={}, correlationKey={}, tenant={}",
+                messageName,
+                correlationKey,
+                tenant != null ? tenant : "<default>"
+        );
+    }
+
+    private void startProcessInstance(String bpmnProcessId, String tenant, Map<String, Object> variables) {
+        var command = camundaClient.newCreateInstanceCommand()
+                .bpmnProcessId(bpmnProcessId)
+                .latestVersion()
+                .variables(variables);
+
+        if (tenant != null && !tenant.isBlank()) {
+            command.tenantId(tenant);
+        }
+
+        var event = command.send().join();
+
+        LOGGER.info("Started instance for process {} in tenant {}. Instance Key: {}",
+                event.getBpmnProcessId(),
+                event.getTenantId(),
+                event.getProcessInstanceKey());
+    }
+
+    private void getMessageSubscriptions() {
+        var response = camundaClient
+                .newMessageSubscriptionSearchRequest()
+                .send()
+                .join();
+
+        response.items().forEach(this::logSubscription);
+    }
+
+    private void logSubscription(MessageSubscription subscription) {
+        LOGGER.info("Message Subscription");
+        LOGGER.info("  Subscription key: {}", subscription.getMessageSubscriptionKey());
+        LOGGER.info("  Message name: {}", subscription.getMessageName());
+        LOGGER.info("  Correlation key: {}", subscription.getCorrelationKey());
+        LOGGER.info("  Process instance key: {}", subscription.getProcessInstanceKey());
+        LOGGER.info("  Element ID: {}", subscription.getElementId());
+        LOGGER.info("--------------------------------------");
+    }
 }
