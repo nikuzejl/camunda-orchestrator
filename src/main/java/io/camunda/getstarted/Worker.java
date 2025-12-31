@@ -11,9 +11,14 @@ import java.util.Map;
 
 @Component
 public class Worker {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Worker.class);
-    
+
+    @JobWorker(type = "init-variables")
+    public Map<String, Object> initialize(final ActivatedJob job) {
+        return Map.of("processInstanceKey", job.getProcessInstanceKey());
+    }
+
     @JobWorker(type = "my-job")
     public void handle(JobClient client, ActivatedJob job) {
         LOGGER.info("Job key: {}", job.getKey());
@@ -27,6 +32,18 @@ public class Worker {
                 .variables(Map.of("outputParam", "outputValue"))
                 .send()
                 .join();
+    }
+
+    @JobWorker(type = "long-running-task", autoComplete = false)
+    public void startAsyncWork(final ActivatedJob job) {
+        long jobKey = job.getKey();
+
+        // Example: Send jobKey to an external system (Message Queue, Third-party API, etc.)
+        System.out.println("Initiating work for jobKey: " + jobKey);
+        //externalSystem.triggerWork(jobKey, job.getVariablesAsMap());
+
+        // We do NOT call client.newCompleteCommand() here.
+        // The job remains 'locked' until the timeout expires or we complete it later.
     }
 
 }

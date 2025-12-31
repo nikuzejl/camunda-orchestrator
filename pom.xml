@@ -1,35 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
-	<name>camunda-svc</name>
-	<description>Camunda Platform Get Started Spring Boot Example </description>
-	<groupId>io.camunda.get-started</groupId>
-	<artifactId>camunda-svc</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>3.5.8</version>
+		<relativePath />
+	</parent>
+	<groupId>io.camunda.demo</groupId>
+	<artifactId>camunda</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>Camunda 8 Learning</name>
+	<description>Trying out Camunda 8 features</description>
+	<url />
+	<licenses>
+		<license />
+	</licenses>
+	<developers>
+		<developer />
+	</developers>
+	<scm>
+		<connection />
+		<developerConnection />
+		<tag />
+		<url />
+	</scm>
 	<properties>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-		<zeebe.version>8.8.6</zeebe.version>
+		<java.version>21</java.version>
 	</properties>
-
 	<dependencies>
+
 		<dependency>
-			<groupId>jakarta.annotation</groupId>
-			<artifactId>jakarta.annotation-api</artifactId>
-			<version>2.1.1</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>io.camunda</groupId>
-			<artifactId>spring-boot-starter-camunda-sdk</artifactId>
-			<version>${zeebe.version}</version>
+			<artifactId>camunda-spring-boot-starter</artifactId>
+			<version>8.8.6</version>
 		</dependency>
+
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.16</version>
+			<groupId>io.camunda</groupId>
+			<artifactId>camunda-process-test-spring</artifactId>
+			<version>8.8.6</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- JUnit 5 -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<version>5.14.1</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -38,7 +70,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>3.3.4</version>
 			</plugin>
 		</plugins>
 	</build>

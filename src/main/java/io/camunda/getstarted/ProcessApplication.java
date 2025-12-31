@@ -2,6 +2,8 @@ package io.camunda.getstarted;
 
 import io.camunda.client.CamundaClient;
 import io.camunda.client.api.search.response.MessageSubscription;
+import io.camunda.client.api.search.response.SearchResponse;
+import io.camunda.client.api.search.response.Variable;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,8 @@ public class ProcessApplication {
         try {
             deployProcess("test-process.bpmn", null);
             getMessageSubscriptions();
-            publishMessage("START-MSG", "some-key", Map.of("runId", "123"), null);
+            //publishMessage("START-MSG", "some-key", Map.of("runId", "123"), null);
+            startProcessInstance("test-process", null,  Map.of("runId", "123"));
             publishMessage("MSG-1", "123", Map.of("runId", "123"), null);
             publishMessage("MSG-2", "123", Map.of("runId", "123"), null);
         } catch (Exception e) {
@@ -94,6 +97,11 @@ public class ProcessApplication {
 
         var event = command.send().join();
 
+        long piKey = event.getProcessInstanceKey();
+        camundaClient.newSetVariablesCommand(piKey)
+                .variables(Map.of("processInstanceKey", String.valueOf(piKey)))
+                .send().join();
+
         LOGGER.info("Started instance for process {} in tenant {}. Instance Key: {}",
                 event.getBpmnProcessId(),
                 event.getTenantId(),
@@ -117,5 +125,21 @@ public class ProcessApplication {
         LOGGER.info("  Process instance key: {}", subscription.getProcessInstanceKey());
         LOGGER.info("  Element ID: {}", subscription.getElementId());
         LOGGER.info("--------------------------------------");
+    }
+
+    private void logSubscription(MessageSubscription subscription, CamundaClient camundaClient) {
+        long piKey = subscription.getProcessInstanceKey();
+        LOGGER.info("Fetching variables for Process Instance: {}", piKey);
+        SearchResponse<Variable> response = camundaClient
+                .newVariableSearchRequest()
+                .filter(f -> f.processInstanceKey(piKey))
+                .send()
+                .join();
+
+        if (response.items() != null) {
+            response.items().forEach(var ->
+                    LOGGER.info("  Variable: {} = {}", var.getName(), var.getValue())
+            );
+        }
     }
 }
