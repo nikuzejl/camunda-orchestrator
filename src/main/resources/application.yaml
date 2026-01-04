@@ -1,13 +1,23 @@
+#camunda:
+#  client:
+#    mode: self-managed
+#    grpc-address: http://localhost:26500
+#    rest-address: http://localhost:8080
+#    deployment:
+#      enabled: true
+#    worker:
+#      defaults:
+#        stream-enabled: false # default
+#  rest:
+#    swagger:
+#      enabled: true # default
+
 camunda:
   client:
-    mode: self-managed
-    grpc-address: http://localhost:26500
-    rest-address: http://localhost:8080
-    deployment:
-      enabled: true
-    worker:
-      defaults:
-        stream-enabled: false # default
-  rest:
-    swagger:
-      enabled: true # default
+    mode: saas
+    auth:
+      client-id: NIPqErwhUt~.w.ELvjT53HjcfB3E7mra
+      client-secret: t5tG5GesgAdL7F_i-_63Qab5wojcgYanWfcO3g~UqulTtYI27Oy_8qcgwenHYDQI
+    cloud:
+      cluster-id: a9c1085b-4a31-4661-9ada-b0540adff4f1
+      region: sin-2
