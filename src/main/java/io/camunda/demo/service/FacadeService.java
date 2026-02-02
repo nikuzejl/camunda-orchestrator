@@ -19,6 +19,9 @@ public class FacadeService {
 
     @PostConstruct
     public void init() {
+        deploymentService.deploy("connectors.bpmn", null);
+        processInstanceService.start("connectors", null, Map.of("key1", "value1", "key2", "value2"));
+
         deploymentService.deploy("test-process.bpmn", null);
 
         processInstanceService.start("test-process", null, Map.of("key1", "value1", "key2", "value2"));
@@ -27,7 +30,8 @@ public class FacadeService {
 
         messageService.publish("START-MSG", "123", Map.of("var1", "value2"), null);
 
-        for (int i = 0; i< 500; i ++){
+        int N = 1;
+        for (int i = 0; i< N; i ++){
             processInstanceService.start("test-process", null, Map.of("key1", "va631q41", "key2", "value2"));
             System.out.println("Started process instance " + i);
         }

@@ -3,7 +3,6 @@
 
 ## REST call examples
 - `curl -X GET http://localhost:8080/v2/topology`
-- `curl -X POST http://localhost:8080/v1/process-instances/{instanceKey}/cancel` 
 - `curl -X POST http://localhost:8080/v2/process-instances/{instanceKey}/cancellation`
 
 ## Others
