@@ -2,8 +2,8 @@ camunda:
   client:
     mode: saas
     auth:
-      client-id: HRVbde9Y7LtRQldoEkT7-iRT.Jv.7jjL
-      client-secret: Mnd-EfZAe~xi8euSLJCZg3UVX-1vJ1Bh4ygNS4Ay47X5HLwLXfQH.30djweMi8d0
+      client-id: 123
+      client-secret: 456
     cloud:
-      cluster-id: bc37791e-69a9-4869-96b7-997a2f7a48f7
-      region: jfk-1
+      cluster-id: 789
+      region: butanyerera
