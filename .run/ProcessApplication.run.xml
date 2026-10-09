@@ -2,7 +2,10 @@
   <configuration default="false" name="ProcessApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
     <option name="ALTERNATIVE_JRE_PATH" value="21" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
-    <module name="camunda" />
+    <option name="envFilePaths">
+      <option value="$USER_HOME$/Library/CloudStorage/GoogleDrive-nikuzejl@gmail.com/My Drive/Secrets/camunda-saas.env" />
+    </option>
+    <module name="camunda.main" />
     <selectedOptions>
       <option name="environmentVariables" />
     </selectedOptions>

@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+}
+
+group = 'io.camunda.demo'
+version = projectVersion
+description = 'Trying out Camunda 8 features'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(javaVersion.toInteger())
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "io.camunda:camunda-spring-boot-starter:${camundaVersion}"
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "io.camunda:camunda-process-test-spring:${camundaVersion}"
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
