@@ -2,13 +2,10 @@ package io.camunda.demo.service;
 
 import io.camunda.client.CamundaClient;
 import io.camunda.client.api.search.response.MessageSubscription;
-import io.camunda.client.api.search.response.ProcessInstance;
 import io.camunda.zeebe.model.bpmn.Bpmn;
 import io.camunda.zeebe.model.bpmn.BpmnModelInstance;
 import io.camunda.zeebe.model.bpmn.instance.ReceiveTask;
 import io.camunda.zeebe.model.bpmn.instance.zeebe.ZeebeProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -20,7 +17,6 @@ import static io.camunda.demo.util.StringUtils.stripQuotes;
 
 @Service
 public class BpmnModelService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BpmnModelService.class);
     private final CamundaClient camundaClient;
     private final ProcessInstanceService piService;
     private final Map<Long, BpmnModelInstance> cache = new HashMap<>();
@@ -31,7 +27,7 @@ public class BpmnModelService {
     }
 
     public Map<String, String> evaluateReceiveTaskProperties(MessageSubscription sub) {
-        BpmnModelInstance model = cache.computeIfAbsent(sub.getProcessDefinitionKey(), this::loadModel);
+        BpmnModelInstance model = cache.computeIfAbsent(sub.getProcessDefinitionKey(), this::loadModelInstanceByDefKey);
         ReceiveTask receiveTask = model.getModelElementById(sub.getElementId());
         ZeebeProperties props = receiveTask.getSingleExtensionElement(ZeebeProperties.class);
         Map<String, String> result = new HashMap<>();
@@ -41,7 +37,8 @@ public class BpmnModelService {
                 String value = p.getValue();
 
                 if (value != null && value.startsWith("$")) {
-                    value = piService.loadVariables(sub.getProcessInstanceKey()).get(value.substring(1));
+                    value = piService.loadVariables(sub.getProcessInstanceKey())
+                            .get(value.substring(1));
                 }
 
                 result.put(p.getName(), value == null ? null : stripQuotes(value));
@@ -51,7 +48,7 @@ public class BpmnModelService {
         return result;
     }
 
-    private BpmnModelInstance loadModel(long defKey) {
+    private BpmnModelInstance loadModelInstanceByDefKey(long defKey) {
         String xml = camundaClient
                 .newProcessDefinitionGetXmlRequest(defKey)
                 .send()

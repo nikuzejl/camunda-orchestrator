@@ -6,10 +6,13 @@ import io.camunda.client.api.search.response.ProcessInstance;
 import io.camunda.client.api.search.response.Variable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static io.camunda.demo.util.Constants.CORRELATION_KEY_VARIABLE;
 import static io.camunda.demo.util.StringUtils.stripQuotes;
 
 @Service
@@ -20,22 +23,20 @@ public class ProcessInstanceService {
         this.camundaClient = camundaClient;
     }
 
-    public void start(String bpmnProcessId, String tenant, Map<String, Object> variables) {
+    public long start(String bpmnProcessId, String tenant, Map<String, Object> variables) {
+        Map<String, Object> instanceVariables = new HashMap<>();
+        if (variables != null) instanceVariables.putAll(variables);
+        instanceVariables.put(CORRELATION_KEY_VARIABLE, UUID.randomUUID().toString());
+
         var cmd = camundaClient
                 .newCreateInstanceCommand()
                 .bpmnProcessId(bpmnProcessId)
                 .latestVersion()
-                .variables(variables);
+                .variables(instanceVariables);
 
         if (tenant != null && !tenant.isBlank()) cmd.tenantId(tenant);
 
-        var event = cmd.send().join();
-
-        camundaClient.newSetVariablesCommand(
-                event.getProcessInstanceKey())
-                .variables(Map.of("processInstanceKey", String.valueOf(event.getProcessInstanceKey())))
-                .send()
-                .join();
+        return cmd.send().join().getProcessInstanceKey();
     }
 
     public Set<Long> findActiveInstanceKeys() {

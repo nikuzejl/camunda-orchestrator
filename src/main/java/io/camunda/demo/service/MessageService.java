@@ -6,10 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
+import static io.camunda.demo.util.Constants.CORRELATION_KEY_VARIABLE;
 
 @Service
 public class MessageService {
@@ -21,17 +20,22 @@ public class MessageService {
     public MessageService(
             CamundaClient camundaClient,
             ProcessInstanceService piService,
-            ProcessInstanceService processInstanceService, BpmnModelService bpmnModelService) {
+            BpmnModelService bpmnModelService) {
         this.camundaClient = camundaClient;
         this.piService = piService;
         this.bpmnModelService = bpmnModelService;
     }
 
-    public void publish(String name, String key, Map<String, Object> vars, String tenant) {
+    public void publish(String name, String correlationKey, Boolean isProcessStartEvent, Map<String, Object> vars, String tenant) {
+        HashMap<String, Object> variables = vars != null ? new HashMap<>(vars) : new HashMap<>();
+
+        if (isProcessStartEvent){
+            variables.put(CORRELATION_KEY_VARIABLE, UUID.randomUUID().toString());
+        }
         var cmd = camundaClient.newPublishMessageCommand()
                 .messageName(name)
-                .correlationKey(key)
-                .variables(vars);
+                .correlationKey(correlationKey)
+                .variables(variables);
 
         if (tenant != null && !tenant.isBlank()) cmd.tenantId(tenant);
         cmd.send().join();
@@ -68,7 +72,7 @@ public class MessageService {
                 camundaClient
                         .newCorrelateMessageCommand()
                         .messageName(messageName)
-                        .correlationKey(String.valueOf(piKey))
+                        .correlationKey(subscription.getCorrelationKey())
                         .send();
             }
             else{

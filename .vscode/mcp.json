@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "camunda docs": {
+      "type": "http",
+      "url": "https://camunda-docs.mcp.kapa.ai"
+    }
+  }
+}
